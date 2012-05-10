@@ -15,9 +15,16 @@ $(function() {
 
 function populateHighScores(scores) {
 	$('div#highScores').html("");
-  for (var i = 0; i < scores.length; ++i) {
-    $('div#highScores').append("<p>" + scores[i][0] + " " + scores[i][1] + "</p>");
-  }
+	$.ajax({
+		url: "/scores.json",
+		dataType: "json",
+		success: function(json){
+			var length = json.length;
+			for(var i = 0; i < length; i++){
+				$('div#highScores').append("<p>" + json[i].score + " " + json[i].name + "</p>");
+			}
+		}
+	});
 }
 
 function updateScore(score) {
@@ -79,11 +86,25 @@ function winnerPrompt(){
 	while(username == null || username == ''){
 		username=prompt("What is your username?");
 	}
-	highScores.push([++guessesLeft, username]);
+	post_new_score(username, ++guessesLeft);
 	populateHighScores(highScores);
 }
 
+function post_new_score(name, score){
+	$.ajax({
+		type: "POST",
+		url: "/scores.json",
+		dataType: 'json',
+		data: {score: {name: name, score: score}}
+	});
+}
+
+function some_callback(json_obj){
+	alert("this worked");
+}
+
 $(document).ready(function(){
+		
 	genRandomNum();
 	$('form#guessTheNumber input#btnGuess').click(function(){
 		if($('form#guessTheNumber input#guess').val() != ""){
